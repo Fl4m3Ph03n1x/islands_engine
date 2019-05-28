@@ -17,8 +17,6 @@ defmodule IslandsEngine.Island do
           %MapSet{} <- coords = add_coordinates(offsets, upper_left)
     do
       {:ok, %Island{coordinates: coords, hit_coordinates: MapSet.new()}}
-    else
-      error -> error
     end
   end
 
