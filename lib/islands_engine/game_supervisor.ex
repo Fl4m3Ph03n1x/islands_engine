@@ -1,4 +1,8 @@
 defmodule IslandsEngine.GameSupervisor do
+@moduledoc """
+Supervisor of Games, keeps game that crash alive.
+"""
+
   use DynamicSupervisor
 
   alias IslandsEngine.Game
