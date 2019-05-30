@@ -6,15 +6,20 @@ defmodule IslandsEngine.Island do
   alias IslandsEngine.{Coordinate, Island}
 
   @type shape :: :square | :atoll | :dot | :l_shape | :s_shape
-  @type coordinate :: {integer, integer}
+  @type cord_offset :: {integer, integer}
 
   @enforce_keys [:coordinates, :hit_coordinates]
   defstruct [:coordinates, :hit_coordinates]
 
-  @spec new(any(), %Coordinate{}) :: {:ok, %Island{}} | {:error, any}
+  @type t :: %__MODULE__{
+    coordinates:      MapSet.t,
+    hit_coordinates:  MapSet.t
+  }
+
+  @spec new(any(), Coordinate.t) :: {:ok, Island.t} | {:error, any}
   def new(type, %Coordinate{} = upper_left) do
-    with  [_|_] <- offsets = offsets(type),
-          %MapSet{} <- coords = add_coordinates(offsets, upper_left)
+    with  [_|_]         <- offsets = offsets(type),
+          {:ok, coords} <- add_coordinates(offsets, upper_left)
     do
       {:ok, %Island{coordinates: coords, hit_coordinates: MapSet.new()}}
     end
@@ -28,15 +33,21 @@ defmodule IslandsEngine.Island do
   defp offsets(:s_shape), do: [{0, 1}, {0, 2}, {1, 0}, {1, 1}]
   defp offsets(_), do: {:error, :invalid_island_type}
 
-  @spec add_coordinates([tuple], %Coordinate{}) :: MapSet | {:error, :invalid_coordinate}
+  @spec add_coordinates([tuple], Coordinate.t) ::
+    {:ok, MapSet.t} | {:error, :invalid_coordinate}
   defp add_coordinates(offsets, upper_left) do
-    Enum.reduce_while(offsets, MapSet.new(), fn(offset, acc) ->
+    res = Enum.reduce_while(offsets, MapSet.new(), fn(offset, acc) ->
       add_coordinate(acc, upper_left, offset)
     end)
+
+    case res do
+      {:error, reason}  -> {:error, reason}
+      map               -> {:ok, map}
+    end
   end
 
-  @spec add_coordinate(MapSet, %Coordinate{}, coordinate) ::
-    {:cont, MapSet} | {:halt, {:error, :invalid_coordinate}}
+  @spec add_coordinate(MapSet.t, Coordinate.t, cord_offset) ::
+    {:cont, MapSet.t} | {:halt, {:error, :invalid_coordinate}}
   defp add_coordinate(
     coordinates,
     %Coordinate{row: row, col: col},
@@ -45,16 +56,17 @@ defmodule IslandsEngine.Island do
     case Coordinate.new(row + row_offset, col + col_offset) do
       {:ok, coord} ->
         {:cont, MapSet.put(coordinates, coord)}
+
       {:error, :invalid_coordinate} ->
         {:halt, {:error, :invalid_coordinate}}
     end
   end
 
-  @spec overlaps?(%Island{}, %Island{}) :: boolean
+  @spec overlaps?(Island.t, Island.t) :: boolean
   def overlaps?(existing_island, new_island), do:
     not MapSet.disjoint?(existing_island.coordinates, new_island.coordinates)
 
-  @spec guess(%Island{}, %Coordinate{}) :: {:hit, %Island{}} | :miss
+  @spec guess(Island.t, Coordinate.t) :: {:hit, Island.t} | :miss
   def guess(island, coord) do
     if MapSet.member?(island.coordinates, coord) do
       new_hits = MapSet.put(island.hit_coordinates, coord)
@@ -64,7 +76,7 @@ defmodule IslandsEngine.Island do
     end
   end
 
-  @spec forested?(%Island{}) :: boolean
+  @spec forested?(Island.t) :: boolean
   def forested?(island), do:
     MapSet.equal?(island.coordinates, island.hit_coordinates)
 

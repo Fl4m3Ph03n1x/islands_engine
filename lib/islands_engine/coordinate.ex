@@ -8,9 +8,14 @@ defmodule IslandsEngine.Coordinate do
   @enforce_keys [:row, :col]
   defstruct [:row, :col]
 
+  @type t :: %__MODULE__{
+    row: integer,
+    col: integer
+  }
+
   @board_range 1..10
 
-  @spec new(integer, integer) :: {:ok, %Coordinate{}} | {:error, :invalid_coordinate}
+  @spec new(integer, integer) :: {:ok, Coordinate.t} | {:error, :invalid_coordinate}
   def new(row, col) when row in @board_range and col in @board_range, do:
     {:ok, %Coordinate{row: row, col: col}}
 

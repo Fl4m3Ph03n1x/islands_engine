@@ -12,8 +12,8 @@ defmodule IslandsEngine.Game  do
 
   @type state ::
     %{
-      player1: %{board: map, guesses: %Guesses{}, name: player_name},
-      player2: %{board: map, guesses: %Guesses{}, name: player_name},
+      player1: %{board: map, guesses: Guesses.t, name: player_name},
+      player2: %{board: map, guesses: Guesses.t, name: player_name},
       rules: %Rules{}
     }
 
@@ -177,7 +177,6 @@ defmodule IslandsEngine.Game  do
 
   @impl GenServer
   def terminate(_reason, _state), do: :ok
-
 
   #################
   # Aux Functions #

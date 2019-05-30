@@ -7,12 +7,12 @@ defmodule IslandsEngine.Board do
 
   @type board :: map
   @type guess_response ::
-    {:hit | :miss, %Island{} | :none, :win | :no_win, board}
+    {:hit | :miss, Island.t | :none, :win | :no_win, board}
 
   @spec new() :: board
   def new, do: %{}
 
-  @spec position_island(board, atom, %Island{})
+  @spec position_island(board, atom, Island.t)
     :: board | {:error, :overlapping_island}
   def position_island(board, key, %Island{} = island) do
     overlaps_existing_island? = Enum.any?(board, fn {a_key, an_island} ->
@@ -30,15 +30,15 @@ defmodule IslandsEngine.Board do
   def all_islands_positioned?(board), do:
     Enum.all?(Island.types, &(Map.has_key?(board, &1)))
 
-  @spec guess(map, %Coordinate{}) :: guess_response
+  @spec guess(map, Coordinate.t) :: guess_response
   def guess(board, %Coordinate{} = coord) do
     board
     |> hit_all_islands(coord)
     |> guess_response(board)
   end
 
-  @spec hit_all_islands(map, %Coordinate{}) ::
-    {Island.shape, %Island{}} | :miss
+  @spec hit_all_islands(map, Coordinate.t) ::
+    {Island.shape, Island.t} | :miss
   defp hit_all_islands(board, %Coordinate{} = coord) do
     hit_island = fn {key, island} ->
       case Island.guess(island, coord) do
@@ -50,7 +50,7 @@ defmodule IslandsEngine.Board do
     Enum.find_value(board, :miss, hit_island)
   end
 
-  @spec guess_response({Island.shape, %Island{}} | :miss, map) ::
+  @spec guess_response({Island.shape, Island.t} | :miss, map) ::
     guess_response
   defp guess_response({key, island}, board) do
     board = %{board | key => island}

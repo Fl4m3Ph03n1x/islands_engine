@@ -9,10 +9,15 @@ defmodule IslandsEngine.Guesses do
   @enforce_keys [:hits, :misses]
   defstruct [:hits, :misses]
 
-  @spec new() :: %Guesses{}
+  @type t :: %__MODULE__{
+    hits:   MapSet.t,
+    misses: MapSet.t
+  }
+
+  @spec new() :: Guesses.t
   def new, do: %Guesses{hits: MapSet.new(), misses: MapSet.new()}
 
-  @spec add(%Guesses{}, :hit | :miss, %Coordinate{}) :: %Guesses{}
+  @spec add(Guesses.t, :hit | :miss, Coordinate.t) :: Guesses.t
   def add(%Guesses{} = guesses, :hit, %Coordinate{} = coord) do
     update_in(guesses.hits, &MapSet.put(&1, coord))
   end
