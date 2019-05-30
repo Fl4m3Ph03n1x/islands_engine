@@ -12,10 +12,16 @@ defmodule IslandsEngine.Rules do
             player1:  :islands_not_set,
             player2:  :islands_not_set
 
-  @spec new() :: %Rules{}
+  @type t :: %__MODULE__{
+    state:    atom,
+    player1:  atom,
+    player2:  atom
+  }
+
+  @spec new() :: Rules.t
   def new, do: %Rules{}
 
-  @spec check(%Rules{}, any) :: {:ok, %Rules{}} | :error
+  @spec check(Rules.t, any) :: {:ok, Rules.t} | :error
   def check(%Rules{state: :initialized} = rules, :add_player), do:
     {:ok, %Rules{rules | state: :players_set}}
 
@@ -56,7 +62,7 @@ defmodule IslandsEngine.Rules do
 
   def check(_state, _action), do: :error
 
-  @spec both_players_islands_set?(%Rules{}) :: boolean
+  @spec both_players_islands_set?(Rules.t) :: boolean
   defp both_players_islands_set?(rules), do:
     rules.player1 == :islands_set and rules.player2 == :islands_set
 
