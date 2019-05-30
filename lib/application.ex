@@ -3,6 +3,8 @@ defmodule IslandsEngine.Application do
 
   use Application
 
+  @spec start(any, any) ::
+    {:ok, pid} | {:error, {:already_started, pid} | {:shutdown, atom} | atom}
   def start(_type, _args) do
     children = [
       {Registry, keys: :unique, name: Registry.Game},
